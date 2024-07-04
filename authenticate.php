@@ -1,58 +1,33 @@
 <?php
 session_start();
 
-// Database connection settings
-$host = 'localhost';
-$dbname = 'register';
-$username = 'root';
-$password = '';
-
-// Function to establish PDO connection
-function connectDatabase($host, $dbname, $username, $password) {
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8mb4", $username, $password);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
-    } catch (PDOException $e) {
-        die("Could not connect to the database $dbname: " . $e->getMessage());
-    }
-}
+include_once("connections/connection.php");
+$con = connection(); // Assuming this initializes $con for mysqli
 
 // Handle form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Connect to the database
-    $pdo = connectDatabase($host, $dbname, $username, $password);
-
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    try {
-        // Check if the user is in the users table
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Prepare SQL statements
+    $stmt_user = mysqli_prepare($con, "SELECT * FROM users WHERE email = ?");
+    $stmt_admin = mysqli_prepare($con, "SELECT * FROM admins WHERE email = ?");
 
-        // Check if the user is in the admins table if not found in users
-        if (!$user) {
-            $stmt = $pdo->prepare("SELECT * FROM admins WHERE email = ?");
-            $stmt->execute([$email]);
-            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($stmt_user && $stmt_admin) {
+        // Bind parameters and execute for users table
+        mysqli_stmt_bind_param($stmt_user, "s", $email);
+        mysqli_stmt_execute($stmt_user);
+        $result_user = mysqli_stmt_get_result($stmt_user);
+        $user = mysqli_fetch_assoc($result_user);
 
-            if ($admin) {
-                // Verify the password for admin
-                if (password_verify($password, $admin['password'])) {
-                    // Set session variables for admin
-                    $_SESSION['admin_id'] = $admin['id'];
-                    $_SESSION['username'] = $admin['username'];
-                    $_SESSION['role'] = 'admin';
+        // Bind parameters and execute for admins table
+        mysqli_stmt_bind_param($stmt_admin, "s", $email);
+        mysqli_stmt_execute($stmt_admin);
+        $result_admin = mysqli_stmt_get_result($stmt_admin);
+        $admin = mysqli_fetch_assoc($result_admin);
 
-                    // Redirect to admin dashboard
-                    header("Location: admin_dashboard.php");
-                    exit();
-                }
-            }
-        } else {
-            // Verify the password for user
+        // Check if user or admin exists and verify password
+        if ($user) {
             if (password_verify($password, $user['password'])) {
                 // Set session variables for user
                 $_SESSION['user_id'] = $user['id'];
@@ -63,16 +38,31 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 header("Location: user_dashboard.php");
                 exit();
             }
+        } elseif ($admin) {
+            if (password_verify($password, $admin['password'])) {
+                // Set session variables for admin
+                $_SESSION['admin_id'] = $admin['id'];
+                $_SESSION['username'] = $admin['username'];
+                $_SESSION['role'] = 'admin';
+
+                // Redirect to admin dashboard
+                header("Location: admin_dashboard.php");
+                exit();
+            }
         }
 
         // Invalid credentials
         echo "Invalid email or password.";
-    } catch (PDOException $e) {
-        // Handle database errors
-        die("Error: " . $e->getMessage());
-    } finally {
-        // Close the connection
-        $pdo = null;
+    } else {
+        // Handle prepare errors
+        die("Prepare statement failed: " . mysqli_error($con));
     }
+
+    // Close statements
+    mysqli_stmt_close($stmt_user);
+    mysqli_stmt_close($stmt_admin);
+    
+    // Close connection
+    mysqli_close($con);
 }
 ?>
