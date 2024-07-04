@@ -29,14 +29,6 @@ $products = $pdo->query($sql);
 <body>
     <nav class="sidebar close">
         <header>
-            <div class="image-text">
-                <span class="image">
-                    <img src="assets/employee.png" alt="logo">
-                </span>
-                <div class="text header-text">
-                    <span class="name">Supplier System</span>
-                </div>
-            </div>
             <i class='bx bx-chevron-right toggle'></i>
         </header>
 
@@ -78,7 +70,6 @@ $products = $pdo->query($sql);
                 </div>
                 <div class="user-info">
                     <div class="search-box"></div>
-                    <img src="assets/profile.png" alt="">
                 </div>
             </div>
             <div class="table-data">

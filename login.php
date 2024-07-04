@@ -3,16 +3,13 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Employee Management System</title>
+    <title>Rice Product System</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
     <div class="form-wrapper">
         <div class="form-side">
-            <a href="#" title="Logo">
-                <img class="logo" src="assets/employee.png" alt="Logo">
-            </a>
             <form class="my-form" action="authenticate.php" method="post">
                 <div class="login-welcome-row">
                     <h1>Hi! Welcome &#x1F44F;</h1>
@@ -61,13 +58,9 @@
             </form>
         </div>
         <div class="info-side">
-            <img src="assets/employee.png" alt="Mock" class="mockup" />
+        <img src="https://images.pexels.com/photos/4110256/pexels-photo-4110256.jpeg" alt="Rice Products" />
             <div class="welcome-message">
-                <h2>Employee Management 👋</h2>
-                <p>
-                    Effortlessly oversee employee-related records and maintain organization with our Employee
-                    Management System.
-                </p>
+                <h2>Rice Products System</h2>
             </div>
         </div>
     </div>
