@@ -41,12 +41,6 @@ $products = $pdo->query($sql);
                             <span class="nav-text">List of Products</span>
                         </a>
                     </li>
-                    <li class="nav-link">
-                        <a href="users.php">
-                            <i class='bx bx-user icon'></i>
-                            <span class="nav-text">Users</span>
-                        </a>
-                    </li>
                 </ul>
             </div>
             <div class="bottom-content">
