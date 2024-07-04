@@ -10,15 +10,13 @@ $con = connection();
 if (isset($_GET['productID'])) {
     $productID = $_GET['productID'];
 
-    // Display the product data
-    $sql = "SELECT * FROM product_list WHERE productID = '$productID'";
-    $products = $con->query($sql) or die($con->error);
-
-    if ($products->num_rows > 0) {
-        $row = $products->fetch_assoc();
-    } else {
-        die("Product not found.");
-    }
+    // Use a prepared statement to prevent SQL injection
+    $stmt = $con->prepare("SELECT * FROM product_list WHERE productID = ?");
+    $stmt->bind_param("i", $productID);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $stmt->close();
 
     // Update button function
     if (isset($_POST['update'])) {
@@ -27,11 +25,12 @@ if (isset($_GET['productID'])) {
         $unitPrice = mysqli_real_escape_string($con, $_POST['unitPrice']);
         $unitsInStock = mysqli_real_escape_string($con, $_POST['unitsInStock']);
         $description = mysqli_real_escape_string($con, $_POST['description']);
-        
-        // Update query
-        $updateSql = "UPDATE product_list SET productName='$productName', unitPrice='$unitPrice', unitsInStock='$unitsInStock', description='$description' WHERE productID='$productID'";
 
-        if ($con->query($updateSql) === TRUE) {
+        // Use a prepared statement to update the product
+        $updateStmt = $con->prepare("UPDATE product_list SET productName = ?, unitPrice = ?, unitsInStock = ?, description = ? WHERE productiD = ?");
+        $updateStmt->bind_param("ssisi", $productName, $unitPrice, $unitsInStock, $description, $productID);
+
+        if ($updateStmt->execute()) {
             // Successful submission
             $_SESSION['success_message'] = "Changes have been successfully updated.";
             echo '<script>alert("Changes have been successfully updated!"); window.location.href = "admin_dashboard.php?ID=' . $productID . '";</script>';
@@ -42,6 +41,7 @@ if (isset($_GET['productID'])) {
             echo '<script>alert("Error updating record: ' . $con->error . '"); window.location.href = "edit.php";</script>';
             exit; // Exit to prevent further execution
         }
+        $updateStmt->close();
     }
 
     // Cancel button function
@@ -50,8 +50,6 @@ if (isset($_GET['productID'])) {
         echo '<script>window.location.href = "admin_dashboard.php?ID=' . $productID . '";</script>';
         exit;
     }
-} else {
-    die("Product ID not specified.");
 }
 ?>
 
@@ -59,7 +57,10 @@ if (isset($_GET['productID'])) {
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Edit Product</title>
+    <title>Supplier System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="css/style1.css">
 </head>
 <body>
@@ -108,7 +109,8 @@ if (isset($_GET['productID'])) {
         <div class="main-content">
             <div class="header-wrapper">
                 <div class="header-title">
-                    <h2>Edit Product</h2>
+                    <span></span>
+                    <h2>Supplier System</h2>
                 </div>
                 <div class="user-info">
                     <div class="search-box"></div>
@@ -119,7 +121,7 @@ if (isset($_GET['productID'])) {
             <div class="table-data">
                 <div class="dep">
                     <div class="head">
-                        <h3>Edit Product</h3>                
+                        <h3>Edit Product</h3>
                         <i class='bx bx-filter'></i>
                     </div>
 
@@ -157,8 +159,8 @@ if (isset($_GET['productID'])) {
                                         <input class="btnText" type="submit" name="update" value="Update">
                                         <i class="uil uil-navigator"></i>
                                     </button>
-                                </div> 
-                            </div>                     
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </div>

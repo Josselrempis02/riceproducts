@@ -106,7 +106,7 @@ $products = $pdo->query($sql);
                                     <td><?php echo htmlspecialchars($row['unitsInStock']); ?></td>
                                     <td><?php echo htmlspecialchars($row['description']); ?></td>
                                     <td class="button_form">
-                                        <a href="edit.php?ID=<?php echo htmlspecialchars($row['productID']); ?>"><i class='bx bx-edit'></i></a>
+                                        <a href="edit.php?productID=<?php echo htmlspecialchars($row['productID']); ?>"><i class='bx bx-edit'></i></a>
                                         <form action="delete.php" method="get" style="display:inline;">
                                             <input type="hidden" name="ID" value="<?php echo htmlspecialchars($row['productID']); ?>">
                                             <button class="button2" type="submit" onclick="return confirm('Are you sure you want to delete this record?')">
